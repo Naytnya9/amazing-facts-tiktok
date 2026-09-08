@@ -4,15 +4,60 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  generate-fact:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Test workflow
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
         run: |
-          echo "🌟 Amazing Facts workflow started!"
-          echo "🎬 Video generation will be added next."
-          echo "📱 TikTok auto-post will be added later."
+          pip install google-genai
+
+      - name: Generate Amazing Fact
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os
+          from google import genai
+
+          client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+          prompt = """
+          Give me ONE amazing and surprising factual fact.
+
+          Rules:
+          - Must be scientifically or historically accurate.
+          - Easy for ordinary people to understand.
+          - Suitable for a short TikTok video.
+          - Maximum 2 sentences.
+          - Do not use emojis.
+          - Do not make up information.
+          """
+
+          response = client.models.generate_content(
+              model="gemini-2.5-flash",
+              contents=prompt
+          )
+
+          fact = response.text.strip()
+
+          print("Generated fact:")
+          print(fact)
+
+          with open("fact.txt", "w", encoding="utf-8") as f:
+              f.write(fact)
+          PY
+
+      - name: Show generated fact
+        run: |
+          echo "===== AMAZING FACT ====="
+          cat fact.txt
+          echo "========================"
