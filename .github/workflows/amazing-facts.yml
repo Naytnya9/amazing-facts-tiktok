@@ -86,3 +86,12 @@ jobs:
           echo "===== VIDEO ====="
           ls -lh amazing_fact.mp4
           echo "================="
+
+      - name: Upload TikTok Video
+        uses: actions/upload-artifact@v4
+        with:
+          name: amazing-fact-video
+          path: |
+            amazing_fact.mp4
+            fact.txt
+            narration.wav
