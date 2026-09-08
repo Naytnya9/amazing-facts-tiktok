@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  generate-fact:
+  generate-content:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +28,9 @@ jobs:
           import os
           from google import genai
 
-          client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+          client = genai.Client(
+              api_key=os.environ["GEMINI_API_KEY"]
+          )
 
           prompt = """
           Give me ONE amazing and surprising factual fact.
@@ -56,8 +58,18 @@ jobs:
               f.write(fact)
           PY
 
-      - name: Show generated fact
+      - name: Generate AI Voice
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          echo "===== AMAZING FACT ====="
+          python generate_voice.py
+
+      - name: Check output
+        run: |
+          echo "===== FACT ====="
           cat fact.txt
-          echo "========================"
+          echo "==============="
+
+          echo "===== AUDIO ====="
+          ls -lh narration.wav
+          echo "================="
